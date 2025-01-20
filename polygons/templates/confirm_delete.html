@@ -1,0 +1,16 @@
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Удаление полигона</title>
+    </head>
+    <body>
+        <p>Действительно удалить полигон "{{ polygon.name }}"?</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Подтвердить</button>
+            <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
+        </form>
+    </body>
+    </html>

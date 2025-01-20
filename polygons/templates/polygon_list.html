@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список полигонов</title>
+    <!-- Подключение Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        tr.selected {
+            background-color: #BDF;
+        }
+        #search-box {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <table id="polygon-table">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Координаты (широта, долгота)</th>
+                <th>Антимеридиан?</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for polygon in polygons %}
+            <tr data-id="{{ polygon.id }}">
+                <td>{{ polygon.name }}</td>
+                <td>{{ polygon.shape }}</td>
+                <td>{{ polygon.flag|yesno:"да,нет,возможно" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="search-box">
+        <input type="text" id="search-input" placeholder="Название полигона...">
+        <button type="button" onclick="searchPolygons();">Найти</button>
+        <button type="button" onclick="location.href=`{% url 'polygon_create' %}`">Создать</button>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        // Инициализируем карту
+        const MCS = [55.75, 37.62];
+        const SPB = [59.94, 30.32];
+        const map = L.map('map').setView(SPB, 11);
+
+        // Добавляем слой OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Загружаем GeoJSON данные
+        let geoJSON = {{ geo_json|safe }};
+        let polygons = L.geoJSON(geoJSON, {
+            onEachFeature: function (feature, polygon) {
+                // При клике на полигон выделить строку в таблице
+                polygon.on('click', function () {
+                    // Убираем подсветку со всех строк
+                    document.querySelectorAll('#polygon-table tbody tr').forEach(row => row.classList.remove('selected'));
+
+                    // Выделяем строку таблицы
+                    let row = document.querySelector(
+                        `#polygon-table tbody tr[data-id="${feature.properties.pk}"]`
+                    );
+                    if (row) {
+                        row.classList.add('selected');
+                        // Прокрутка к строке
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+        }).addTo(map);
+
+        // Устанавливаем границы карты по полигонам
+        map.fitBounds(polygons.getBounds());
+
+        // Добавляем обработчики событий таблицы
+        let rows = document.querySelectorAll('#polygon-table tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('click', function () {
+                // Убираем подсветку со всех строк
+                rows.forEach(r => r.classList.remove('selected'));
+                // Подсвечиваем текущую строку
+                this.classList.add('selected');
+
+                let dataId = this.getAttribute('data-id');
+                polygons.eachLayer(polygon => {
+                    if (polygon.feature.properties.pk == dataId) {
+                        map.fitBounds(polygon.getBounds());
+                    }
+                });
+            });
+            row.addEventListener('dblclick', function() {
+                let dataId = this.getAttribute('data-id');
+                if (dataId) {
+                    // Перенаправляем на страницу редактирования
+                    const updateUrlTemplate = "{% url 'polygon_update' pk=0 %}"; // на сервере
+                    window.location.href = updateUrlTemplate.replace('0', dataId); // на клиенте
+                }
+            });
+        });
+
+        // Функционал поиска по названию
+        const searchInput = document.getElementById('search-input');
+
+        function searchPolygons() {
+            let lowerQuery = searchInput.value.trim().toLowerCase();
+            if (!lowerQuery) return;
+
+            let foundBounds = [];
+            rows.forEach(row => {
+                let lowerName = row.querySelector('td').textContent.toLowerCase();
+                if (lowerName.includes(lowerQuery)) {
+                    // Подсвечиваем найденную строку
+                    row.classList.add('selected');
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    let dataId = row.getAttribute('data-id');
+                    polygons.eachLayer(polygon => {
+                        if (polygon.feature.properties.pk == dataId) {
+                            foundBounds.push(polygon.getBounds());
+                        }
+                    });
+                } else {
+                    // Убираем подсветку строки
+                    row.classList.remove('selected');
+                }
+            });
+
+            // Устанавливаем границы карты по полигонам
+            if (foundBounds) map.fitBounds(foundBounds);
+        }
+
+        // Поиск по нажатию клавиши Enter
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') searchPolygons();
+        });
+    </script>
+</body>
+</html>

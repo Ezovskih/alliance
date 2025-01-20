@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Изменение{% else %}Создание{% endif %} полигона</title>
+    <!-- Подключение Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid black;
+        }
+        input, textarea {
+            width: 400px;
+        }
+        label {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <form method="post" onsubmit="onSubmit()">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if form.instance.pk %}
+        <button type="button" onclick="location.href=`{% url 'polygon_delete' pk=form.instance.pk %}`">Удалить</button>
+        {% endif %}
+        <button type="submit">Сохранить</button>
+        <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
+    </form>
+
+    <div id="map"></div>
+
+    <script>
+        console.log('INSTANCE:' + '{{ form.instance }}');
+        // Инициализируем карту
+        const MCS = [55.75, 37.62];
+        const SPB = [59.94, 30.32];
+        const map = L.map('map').setView(SPB, 11);
+
+        // Добавляем слой OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Добавляем линию антимеридиана
+        var antimeridianLine = L.polyline([
+            [90, 180], // Северный полюс
+            [-90, 180] // Южный полюс
+        ], {
+            color: 'yellow', // цвет
+            weight: 0.5, // толщина
+        }).addTo(map);
+
+        // Инициализируем полигон
+        {% if shape %}
+        try {
+            let shape = {{ shape.geojson|safe }};
+            let layer = L.geoJSON(shape).getLayers()[0];  // первый слой из группы
+            var polygon = layer.addTo(map);
+            if (!polygon.isEmpty()) {
+                map.fitBounds(polygon.getBounds());
+            } else {
+                // Устанавливаем глобальный вид
+                map.setView([0, 0], 1);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Ошибка загрузки данных полигона!");
+        }
+        {% else %}
+        var polygon = L.polygon([]).addTo(map);
+        {% endif %}
+
+        // Инициализируем поле с координатами
+        const coordinates = document.getElementById('id_coordinates');
+        function updateCoordinates() {
+            if (polygon instanceof L.Polygon) {
+                let coords = polygon.getLatLngs()[0].map(function(point) {
+                    return `[${point.lat}, ${point.lng}]`;
+                });
+                coordinates.value = `[${coords.join(',\n')}]`;
+            }
+        }
+        updateCoordinates();
+
+        // Обновляем карту при изменении координат (Ctrl + Enter)
+        coordinates.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                // event.preventDefault();
+                try {
+                    var latLngs = JSON.parse(coordinates.value).map(function(point) {
+                        return L.latLng(point[0], point[1]);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    alert("Координаты полигона некорректны!");
+                }
+
+                // Удаляем существующий полигон и создаем новый
+                if (polygon instanceof L.Polygon) map.removeLayer(polygon);
+                polygon = L.polygon(latLngs).addTo(map);
+
+                if (!polygon.isEmpty()) map.fitBounds(polygon.getBounds());
+            }
+        });
+
+        // При клике на карте добавляем новые координаты
+        map.on('click', function(e) {
+            if (polygon) {
+                polygon.addLatLng(e.latlng);
+                updateCoordinates();
+            }
+        });
+
+        // При отправке формы сохраняем полигон в скрытое поле
+        function onSubmit() {
+            if (polygon) {
+                let shape = polygon.toGeoJSON().geometry;
+                document.getElementById('id_shape').value = JSON.stringify(shape);
+            }
+        }
+    </script>
+</body>
+</html>

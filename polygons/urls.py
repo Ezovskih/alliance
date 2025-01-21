@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import polygon_list, polygon_create, polygon_update, polygon_delete
+from polygons.views import polygon_list, polygon_create, polygon_update, polygon_delete
 
 
 # app_name = 'polygons'  # используется как префикс к ссылке

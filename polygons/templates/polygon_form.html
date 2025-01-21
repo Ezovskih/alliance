@@ -1,18 +1,13 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>{% if form.instance.pk %}Изменение{% else %}Создание{% endif %} полигона</title>
-    <!-- Подключение Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-        #map {
-            height: 500px;
-            width: 100%;
-            margin-top: 20px;
-            border: 1px solid black;
-        }
         input, textarea {
             width: 400px;
         }
@@ -33,29 +28,8 @@
     </form>
 
     <div id="map"></div>
-
+    <script src="{% static 'default_map.js' %}"></script>
     <script>
-        console.log('INSTANCE:' + '{{ form.instance }}');
-        // Инициализируем карту
-        const MCS = [55.75, 37.62];
-        const SPB = [59.94, 30.32];
-        const map = L.map('map').setView(SPB, 11);
-
-        // Добавляем слой OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // Добавляем линию антимеридиана
-        var antimeridianLine = L.polyline([
-            [90, 180], // Северный полюс
-            [-90, 180] // Южный полюс
-        ], {
-            color: 'yellow', // цвет
-            weight: 0.5, // толщина
-        }).addTo(map);
-
         // Инициализируем полигон
         {% if shape %}
         try {

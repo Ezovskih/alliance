@@ -6,7 +6,7 @@ class PolygonModel(models.Model):
     class Meta:
         db_table = 'polygons'
 
-    name = models.CharField(verbose_name="Название", max_length=64)
+    name = models.CharField(verbose_name="Название")
     shape = models.PolygonField(verbose_name="Координаты")
     flag = models.BooleanField(verbose_name="Антимеридиан?", default=False, editable=False)
     # TODO flag = models.GeneratedField(expression=???, output_field=models.BooleanField(), db_persist=True)

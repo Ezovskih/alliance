@@ -1,18 +1,22 @@
 from pathlib import Path
 
+
 DEBUG = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 INSTALLED_APPS = [
-    # 'django.contrib.admin',
-    # 'django.contrib.messages',
-    # 'django.contrib.sessions',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'daphne',
     'django.contrib.staticfiles',
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
+    'django.contrib.messages',
+    'django.contrib.sessions',
+    'django.contrib.admin',
     'django.contrib.gis',
+    'channels',
     'polygons',
+    'intersections',
 ]
 
 MIDDLEWARE = [
@@ -25,16 +29,26 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-APPEND_SLASH = True
-ROOT_URLCONF = 'app.urls'
-WSGI_APPLICATION = 'app.wsgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    },
+    'redis': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': { 'hosts': [('127.0.0.1', 6379)], },
+    },
+}
 
-STATIC_URL = 'static/'
+ROOT_URLCONF = 'app.urls'
+# WSGI_APPLICATION = 'app.wsgi.application'
+ASGI_APPLICATION = 'app.asgi.application'  # Daphne
+
+STATIC_URL = '/static/'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # path.join(BASE_DIR, 'polygons', 'templates'),
+            # path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -73,6 +87,9 @@ AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 ALLOWED_HOSTS = []
+
+INTERSECT_API_URL = ''
+INTERSECT_API_KEY = ''
 
 LANGUAGE_CODE = 'ru-ru'
 USE_I18N = True

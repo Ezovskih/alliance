@@ -1,18 +1,14 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Список полигонов</title>
-    <!-- Подключение Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'public_alert.css' %}">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-        #map {
-            height: 500px;
-            width: 100%;
-            margin-top: 20px;
-            border: 1px solid black;
-        }
         table {
             border-collapse: collapse;
             width: 100%;
@@ -34,6 +30,8 @@
     </style>
 </head>
 <body>
+    <div id="public-alert"></div>
+
     <table id="polygon-table">
         <thead>
             <tr>
@@ -60,19 +58,8 @@
     </div>
 
     <div id="map"></div>
-
+    <script src="{% static 'default_map.js' %}"></script>
     <script>
-        // Инициализируем карту
-        const MCS = [55.75, 37.62];
-        const SPB = [59.94, 30.32];
-        const map = L.map('map').setView(SPB, 11);
-
-        // Добавляем слой OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
         // Загружаем GeoJSON данные
         let geoJSON = {{ geo_json|safe }};
         let polygons = L.geoJSON(geoJSON, {
@@ -124,7 +111,7 @@
             });
         });
 
-        // Функционал поиска по названию
+        // Добавляем поиск по названию
         const searchInput = document.getElementById('search-input');
 
         function searchPolygons() {

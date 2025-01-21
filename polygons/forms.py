@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.gis.geos import GEOSGeometry
 
-from .models import PolygonModel
+from polygons.models import PolygonModel
 
 
 class PolygonForm(forms.ModelForm):

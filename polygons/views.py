@@ -1,8 +1,9 @@
 from django.core.serializers import serialize
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .models import PolygonModel
-from .forms import PolygonForm
+from polygons.models import PolygonModel
+from polygons.forms import PolygonForm
+from intersections.views import check_intersections
 
 
 def polygon_list(request):
@@ -17,7 +18,8 @@ def polygon_create(request):
     if request.method == "POST":
         form = PolygonForm(request.POST)
         if form.is_valid():
-            form.save()
+            polygon = form.save()
+            check_intersections(polygon)
             return redirect('polygon_list')
     else:
         form = PolygonForm()
@@ -31,7 +33,8 @@ def polygon_update(request, pk):
     if request.method == "POST":
         form = PolygonForm(request.POST, instance=polygon)
         if form.is_valid():
-            form.save()
+            polygon = form.save()
+            check_intersections(polygon)
             return redirect('polygon_list')
     else:
         form = PolygonForm(instance=polygon)

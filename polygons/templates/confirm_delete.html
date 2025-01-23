@@ -1,16 +1,18 @@
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <title>Удаление полигона</title>
-    </head>
-    <body>
-        <p>Действительно удалить полигон "{{ polygon.name }}"?</p>
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удаление полигона</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'dialog.css' %}">
+</head>
+<body>
+    <p style="color: red; font-weight: bold">Удалить полигон "{{ polygon.name }}"?</p>
 
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit">Подтвердить</button>
-            <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
-        </form>
-    </body>
-    </html>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Подтвердить</button>
+        <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
+    </form>
+</body>
+</html>

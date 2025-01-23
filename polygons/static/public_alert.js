@@ -8,12 +8,14 @@ socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
 
     // Формируем HTML сообщения
-    alertHtml += ;
-    publicAlert.innerHTML = `<div>${data.message}</div>\n<a href="${data.url}">Редактировать</a>`;
-    publicAlert.style.display = 'block';  // поверх страницы
+    let alertHTML = `<div>${data.message}</div>`;
+    if (data.url) {
+        alertHTML += `<a href="${data.url}">Перейти</a>`;
+    publicAlert.innerHTML = alertHTML;
+    publicAlert.style.display = 'block';  // размешаем поверх страницы
 
     // Скрываем сообщение через 5 секунд
-    setTimeout(() => { messageContainer.style.display = 'none'; }, 5000);
+    setTimeout(() => { publicAlert.style.display = 'none'; }, 5000);
 };
 
 // Обрабатываем полученные ошибки

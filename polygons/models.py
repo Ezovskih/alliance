@@ -1,15 +1,18 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.auth.models import User
 
 
 class PolygonModel(models.Model):
     class Meta:
         db_table = 'polygons'
 
-    name = models.CharField(verbose_name="Название")
+    name = models.CharField(verbose_name="Название", unique=True)
     shape = models.PolygonField(verbose_name="Координаты")
     flag = models.BooleanField(verbose_name="Антимеридиан?", default=False, editable=False)
     # TODO flag = models.GeneratedField(expression=???, output_field=models.BooleanField(), db_persist=True)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     objects = models.Manager()  # или PyCharm Professional
 

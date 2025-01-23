@@ -23,3 +23,8 @@ class PublicAlertConsumer(AsyncWebsocketConsumer):
             'message': event['message'],
             'url': reverse('polygon_update', args=(event['polygon_id'],)),
         }))
+
+    async def send_message(self, event):
+        await self.send(text_data=dumps({
+            'message': event['message'],
+        }))

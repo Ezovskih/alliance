@@ -4,6 +4,7 @@ from pathlib import Path
 DEBUG = True
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+APP_DIR = Path(__file__).resolve().parent
 
 INSTALLED_APPS = [
     'daphne',
@@ -22,11 +23,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 CHANNEL_LAYERS = {
@@ -48,7 +49,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # path.join(BASE_DIR, 'templates'),
+            Path.joinpath(APP_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -79,17 +80,16 @@ GDAL_LIBRARY_PATH = 'C:/Program Files/GDAL/gdal.dll'
 GEOS_LIBRARY_PATH = 'C:/Program Files/GDAL/geos_c.dll'
 # PROJ_LIB = 'C:/Program Files/GDAL/projlib'
 
-SECRET_KEY = 'django-insecure-twn=0dnvdbjchq1y+lh05^0-0rm$u(v9f+(#aqygtu1!4+iuyp'
+SECRET_KEY = 'app-secret-key-1'
+ALLOWED_HOSTS = ['*']
 AUTH_PASSWORD_VALIDATORS = [
-    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
-ALLOWED_HOSTS = []
 
-INTERSECT_API_URL = ''
-INTERSECT_API_KEY = ''
+# SESSION_COOKIE_AGE = 10
+
+INTERSECTIONS_API_URL = 'http://localhost:8000/intersections/check/'
+INTERSECTIONS_API_KEY = 'intersections-api-key-1'
 
 LANGUAGE_CODE = 'ru-ru'
 USE_I18N = True

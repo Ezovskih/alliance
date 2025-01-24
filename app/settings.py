@@ -34,15 +34,18 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     },
-    'redis': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': { 'hosts': [('127.0.0.1', 6379)], },
-    },
+    # 'redis': {
+    #     'BACKEND': 'channels_redis.core.RedisChannelLayer',
+    #     'CONFIG': { 'hosts': [('127.0.0.1', 6379)], },
+    # },
 }
 
 ROOT_URLCONF = 'app.urls'
 # WSGI_APPLICATION = 'app.wsgi.application'
 ASGI_APPLICATION = 'app.asgi.application'  # Daphne
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 
 STATIC_URL = '/static/'
 TEMPLATES = [
@@ -69,7 +72,7 @@ DATABASES = {
         'NAME': 'alliance',
         'USER': 'postgres',
         'PASSWORD': '12345678',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     },
 }
@@ -80,15 +83,13 @@ GDAL_LIBRARY_PATH = 'C:/Program Files/GDAL/gdal.dll'
 GEOS_LIBRARY_PATH = 'C:/Program Files/GDAL/geos_c.dll'
 # PROJ_LIB = 'C:/Program Files/GDAL/projlib'
 
-SECRET_KEY = 'app-secret-key-1'
+SECRET_KEY = 'secret-key-1'
 ALLOWED_HOSTS = ['*']
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
 ]
 
-# SESSION_COOKIE_AGE = 10
-
-INTERSECTIONS_API_URL = 'http://localhost:8000/intersections/check/'
+INTERSECTIONS_API_URL = 'http://127.0.0.1:8000/intersections/check/'
 INTERSECTIONS_API_KEY = 'intersections-api-key-1'
 
 LANGUAGE_CODE = 'ru-ru'
@@ -96,4 +97,4 @@ USE_I18N = True
 TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'  # id

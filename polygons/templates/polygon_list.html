@@ -4,11 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Список полигонов</title>
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'public_alert.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'message_box.css' %}">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
+        body {
+            margin: 10px;
+        }
         table {
             border-collapse: collapse;
             width: 100%;
@@ -23,15 +27,24 @@
         tr.selected {
             background-color: #BDF;
         }
-        #search-box {
-            margin-top: 20px;
-            margin-bottom: 20px;
+        #search-box, #user-box {
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="public-alert"></div>
-
+    {% if user.is_authenticated %}
+    <div id="user-box">
+        Работает <b>{{ user.username }}</b>
+        <form action="{% url 'account_logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit">Выход</button>
+        </form>
+    </div>
+    <div id="message-box"></div>
+    <script src="{% static 'message_box.js' %}"></script>
+    {% endif %}
     <table id="polygon-table">
         <thead>
             <tr>
@@ -60,7 +73,7 @@
     <div id="map"></div>
     <script src="{% static 'default_map.js' %}"></script>
     <script>
-        // Загружаем GeoJSON данные
+        // Добавляем полигоны и обработчики событий
         let geoJSON = {{ geo_json|safe }};
         let polygons = L.geoJSON(geoJSON, {
             onEachFeature: function (feature, polygon) {
@@ -68,11 +81,8 @@
                 polygon.on('click', function () {
                     // Убираем подсветку со всех строк
                     document.querySelectorAll('#polygon-table tbody tr').forEach(row => row.classList.remove('selected'));
-
                     // Выделяем строку таблицы
-                    let row = document.querySelector(
-                        `#polygon-table tbody tr[data-id="${feature.properties.pk}"]`
-                    );
+                    let row = document.querySelector(`#polygon-table tbody tr[data-id="${feature.properties.pk}"]`);
                     if (row) {
                         row.classList.add('selected');
                         // Прокрутка к строке

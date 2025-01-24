@@ -9,9 +9,7 @@ from app.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
-django_asgi_app = get_asgi_application()
-
 application = ProtocolTypeRouter({
-       "http": django_asgi_app,
+       "http": get_asgi_application(),
        "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
    })

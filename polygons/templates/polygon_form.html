@@ -4,38 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <title>{% if form.instance.pk %}Изменение{% else %}Создание{% endif %} полигона</title>
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
+        body {
+            margin: 10px;
+        }
         input, textarea {
             width: 400px;
         }
         label {
+            margin-top: 10px;
             display: block;
+        }
+        #form-buttons {
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <form method="post" onsubmit="onSubmit()">
         {% csrf_token %}
-        {{ form.as_p }}
-        {% if form.instance.pk %}
-        <button type="button" onclick="location.href=`{% url 'polygon_delete' pk=form.instance.pk %}`">Удалить</button>
-        {% endif %}
-        <button type="submit">Сохранить</button>
-        <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
+        {{ form.as_div }}
+        <div id="form-buttons">
+            {% if form.instance.pk %}
+            <button type="button" onclick="location.href=`{% url 'polygon_delete' pk=form.instance.pk %}`">Удалить</button>
+            {% endif %}
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="location.href=`{% url 'polygon_list' %}`">Отмена</button>
+        </div>
     </form>
 
     <div id="map"></div>
     <script src="{% static 'default_map.js' %}"></script>
     <script>
         // Инициализируем полигон
-        {% if shape %}
+        {% if form.instance.shape %}
         try {
-            let shape = {{ shape.geojson|safe }};
-            let layer = L.geoJSON(shape).getLayers()[0];  // первый слой из группы
-            var polygon = layer.addTo(map);
+            let shape = {{ form.instance.shape.geojson|safe }};
+            let layers = L.geoJSON(shape).getLayers();
+            var polygon = layers[0].addTo(map);  // первый слой из группы
             if (!polygon.isEmpty()) {
                 map.fitBounds(polygon.getBounds());
             } else {
@@ -49,6 +60,19 @@
         {% else %}
         var polygon = L.polygon([]).addTo(map);
         {% endif %}
+
+        // Добавляем пересекающиеся полигоны
+        function xStyle(feature) {
+            return {
+                weight: 3,
+                dashArray: 15, // пунктир
+                color: 'red', // контур
+                fillColor: 'red',
+                opacity: 0.5,
+                fillOpacity: 0.1
+            };
+        }
+        L.geoJSON({{ intersections|safe }}, {style: xStyle}).addTo(map);
 
         // Инициализируем поле с координатами
         const coordinates = document.getElementById('id_coordinates');
@@ -84,9 +108,9 @@
         });
 
         // При клике на карте добавляем новые координаты
-        map.on('click', function(e) {
+        map.on('click', function(event) {
             if (polygon) {
-                polygon.addLatLng(e.latlng);
+                polygon.addLatLng(event.latlng);
                 updateCoordinates();
             }
         });

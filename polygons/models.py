@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.auth.models import User
@@ -16,6 +17,10 @@ class PolygonModel(models.Model):
 
     objects = models.Manager()  # или PyCharm Professional
 
+    @property
+    def link(self):
+        return reverse('polygon_update', args=[self.pk])
+
     def __str__(self):
         return self.name
 
@@ -27,4 +32,5 @@ class PolygonModel(models.Model):
         # Устанавливаем пересечение с антимеридианом
         antimeridian = GEOSGeometry('LINESTRING(180 -90, 180 90)')
         self.flag = GEOSGeometry(self.shape).intersects(antimeridian)
+
         super().save(*args, **kwargs)

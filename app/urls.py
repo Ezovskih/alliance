@@ -11,5 +11,4 @@ urlpatterns = [
     path('logout/', account_logout, name='account_logout'),
     path('admin/', admin_site.urls),
     path('polygons/', include('polygons.urls')),
-    path('intersections/', include('intersections.urls')),
 ]

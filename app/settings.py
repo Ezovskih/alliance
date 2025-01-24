@@ -32,12 +32,11 @@ MIDDLEWARE = [
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
     },
-    # 'redis': {
-    #     'BACKEND': 'channels_redis.core.RedisChannelLayer',
-    #     'CONFIG': { 'hosts': [('127.0.0.1', 6379)], },
-    # },
 }
 
 ROOT_URLCONF = 'app.urls'
@@ -77,8 +76,6 @@ DATABASES = {
     },
 }
 
-# GDAL_LIBRARY_PATH = r'C:/OSGeo4W/bin/gdal309.dll'
-# GEOS_LIBRARY_PATH = r'C:/OSGeo4W/bin/geos_c.dll'
 GDAL_LIBRARY_PATH = 'C:/Program Files/GDAL/gdal.dll'
 GEOS_LIBRARY_PATH = 'C:/Program Files/GDAL/geos_c.dll'
 # PROJ_LIB = 'C:/Program Files/GDAL/projlib'
@@ -88,9 +85,6 @@ ALLOWED_HOSTS = ['*']
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
 ]
-
-INTERSECTIONS_API_URL = 'http://127.0.0.1:8000/intersections/check/'
-INTERSECTIONS_API_KEY = 'intersections-api-key-1'
 
 LANGUAGE_CODE = 'ru-ru'
 USE_I18N = True

@@ -4,13 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{% if form.instance.pk %}Изменение{% else %}Создание{% endif %} полигона</title>
-    <link rel="shortcut icon" href="{% static 'favicon.png' %}"/>
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             margin: 10px;
+        }
+        button {
+            margin-right: 10px;
         }
         input, textarea {
             width: 400px;
@@ -72,7 +75,9 @@
                 fillOpacity: 0.1
             };
         }
+        {% if intersections %}
         L.geoJSON({{ intersections|safe }}, {style: xStyle}).addTo(map);
+        {% endif %}
 
         // Инициализируем поле с координатами
         const coordinates = document.getElementById('id_coordinates');
@@ -95,8 +100,7 @@
                         return L.latLng(point[0], point[1]);
                     });
                 } catch (error) {
-                    console.error(error);
-                    alert("Координаты полигона некорректны!");
+                    var latLngs = [];
                 }
 
                 // Удаляем существующий полигон и создаем новый

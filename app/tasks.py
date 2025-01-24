@@ -16,6 +16,7 @@ def check_intersections(polygon_id):
     ).exclude(id=polygon.pk)
 
     if not intersected_polygons.exists():
+        send_message(polygon.user, "Полигон \"" + polygon.name + "\" прошел проверку!")
         return False
 
     # Удаляем имеющиеся записи о пересечениях
@@ -25,18 +26,21 @@ def check_intersections(polygon_id):
         # Создаем новую запись о пересечении полигонов
         IntersectionModel.objects.create(polygon_id=polygon.pk, intersected_id=intersected.pk)
 
-    send_message("Полигон \"" + polygon.name + "\" пересекается с полигонами:\n"
-        + ', '.join(f"\"{x.name}\"" for x in intersected_polygons))
+    send_message(
+        user=polygon.user,
+        text="Полигон \"" + polygon.name + "\" пересекается с полигонами:\n"
+            + ', '.join(f"\"{x.name}\"" for x in intersected_polygons),
+        link=polygon.link
+    )
     return True
 
-
-def send_message(message, user_id = None):
+def send_message(user, text, link=None):
     from channels.layers import get_channel_layer
     from asgiref.sync import async_to_sync
 
-    from app.consumers import NotificationConsumer
-    group_name = f"user_{user_id}" if user_id else NotificationConsumer.group_name
-
     channel_layer = get_channel_layer()
     sync_group_send = async_to_sync(channel_layer.group_send)
-    sync_group_send(group_name, { 'type': 'send_message', 'message': message })
+    sync_group_send(
+        group=f"user_{user.id}_queue",
+        message={'type': 'send_message', 'text': text, 'link': link}
+    )

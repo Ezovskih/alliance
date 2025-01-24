@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Список полигонов</title>
-    <link rel="shortcut icon" href="{% static 'favicon.png' %}"/>
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'message_box.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'default_map.css' %}" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             margin: 10px;
+        }
+        button {
+            margin-right: 10px;
         }
         table {
             border-collapse: collapse;
@@ -41,8 +43,8 @@
           {% csrf_token %}
           <button type="submit">Выход</button>
         </form>
+        <span id="message-box">Сообщений нет</span>
     </div>
-    <div id="message-box"></div>
     <script src="{% static 'message_box.js' %}"></script>
     {% endif %}
     <table id="polygon-table">

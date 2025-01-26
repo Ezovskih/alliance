@@ -11,7 +11,6 @@ socket.onopen = function(e) {
 // Обрабатываем полученное сообщение
 socket.onmessage = function(event) {
     const message = JSON.parse(event.data);
-    console.log("MESSAGE:", message);
     // Формируем HTML сообщения
     messageBox.innerHTML = `<i>${message.text}</i>`;
     if (message.link) messageBox.innerHTML += `&nbsp;<a href="${message.link}">Перейти</a>`;

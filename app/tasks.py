@@ -24,7 +24,7 @@ def check_intersections(polygon_id):
 
     for intersected in intersected_polygons:
         # Создаем новую запись о пересечении полигонов
-        IntersectionModel.objects.create(polygon_id=polygon.pk, intersected_id=intersected.pk)
+        i = IntersectionModel.objects.create(polygon_id=polygon.pk, intersected_id=intersected.pk)
 
     send_message(
         user=polygon.user,
@@ -35,12 +35,16 @@ def check_intersections(polygon_id):
     return True
 
 def send_message(user, text, link=None):
-    from channels.layers import get_channel_layer
     from asgiref.sync import async_to_sync
-
-    channel_layer = get_channel_layer()
-    sync_group_send = async_to_sync(channel_layer.group_send)
-    sync_group_send(
-        group=f"user_{user.id}_queue",
-        message={'type': 'send_message', 'text': text, 'link': link}
+    # from channels.layers import get_channel_layer
+    # channel_layer = get_channel_layer()
+    # async_to_sync(channel_layer.group_send)(
+    #     f"user_{user.id}_group", {
+    #         'type': 'send_user_message',
+    #         'text': text, 'link': link
+    #     }
+    from app.consumers import MessageConsumer
+    async_to_sync(MessageConsumer.post_user_message)(
+        MessageConsumer.get_user_queue(user.id),
+        text, link
     )

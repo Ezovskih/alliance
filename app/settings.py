@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 DEBUG = True
+SERVER_IP = '127.0.0.1'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_DIR = Path(__file__).resolve().parent
@@ -34,7 +35,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [(SERVER_IP, 6379)],
         },
     },
 }
@@ -43,8 +44,8 @@ ROOT_URLCONF = 'app.urls'
 # WSGI_APPLICATION = 'app.wsgi.application'
 ASGI_APPLICATION = 'app.asgi.application'  # Daphne
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = f"redis://{SERVER_IP}:6379/0"
+# CELERY_RESULT_BACKEND = f"redis://{SERVER_IP}:6379/0"
 
 STATIC_URL = '/static/'
 TEMPLATES = [
@@ -71,7 +72,7 @@ DATABASES = {
         'NAME': 'alliance',
         'USER': 'postgres',
         'PASSWORD': '12345678',
-        'HOST': '127.0.0.1',
+        'HOST': SERVER_IP,
         'PORT': '5432',
     },
 }
